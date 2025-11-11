@@ -1,0 +1,202 @@
+/* === CONTENEDOR PRINCIPAL === */
+.envio-container {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.envio-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* === TÍTULO === */
+.envio-container h2 {
+  text-align: center;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* === FORMULARIO === */
+.envio-form label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.envio-form input,
+.envio-form select {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: 1.8px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.25s ease;
+  background-color: #fafafa;
+}
+
+.envio-form input:focus,
+.envio-form select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+/* === MAPA === */
+.leaflet-container {
+  height: 420px !important;
+  width: 100%;
+  border-radius: 15px;
+  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* === RESUMEN === */
+.resumen {
+  background-color: #f8faff;
+  padding: 20px;
+  border-radius: 15px;
+  border: 1.5px solid #e2e8f0;
+  margin-top: 25px;
+  transition: 0.3s ease;
+}
+
+.resumen:hover {
+  background-color: #f0f5ff;
+  border-color: #c7d9ff;
+}
+
+.resumen p {
+  margin: 6px 0;
+  font-size: 15px;
+  color: #444;
+}
+
+.resumen .total {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  color: #0078ff;
+  font-weight: 700;
+}
+
+/* === BOTONES === */
+.botones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.btn-volver,
+.btn-confirmar {
+  padding: 12px 24px;
+  font-size: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-volver {
+  background-color: #555;
+  color: #fff;
+}
+
+.btn-volver:hover {
+  background-color: #333;
+  transform: translateY(-1px);
+}
+
+.btn-confirmar {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+
+.btn-confirmar:hover {
+  background-color: #0066d6;
+  box-shadow: 0 6px 14px rgba(0, 123, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* === ANIMACIONES DE TRANSPORTE === */
+.anim-moto {
+  animation: vibrar 0.6s infinite alternate;
+  display: inline-block;
+}
+
+.anim-truck {
+  animation: mover 1.4s infinite linear;
+  display: inline-block;
+}
+
+@keyframes vibrar {
+  from { transform: translateX(0px) rotate(-2deg); }
+  to { transform: translateX(2px) rotate(2deg); }
+}
+
+@keyframes mover {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+
+/* === CUADRO DE CONFIRMACIÓN === */
+.confirmacion {
+  background: #f9fbff;
+  border: 1.5px solid #d6e0f5;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  animation: aparecer 0.6s ease;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.confirmacion h3 {
+  color: #007bff;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.confirmacion p {
+  font-size: 15px;
+  color: #333;
+  margin: 8px 0;
+}
+
+.confirmacion .error {
+  color: red;
+  font-weight: bold;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .envio-container {
+    margin: 20px;
+    padding: 25px;
+  }
+
+  .btn-volver,
+  .btn-confirmar {
+    width: 48%;
+    font-size: 14px;
+  }
+}

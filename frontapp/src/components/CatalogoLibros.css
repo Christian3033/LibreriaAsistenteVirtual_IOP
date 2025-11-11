@@ -1,0 +1,143 @@
+/* === CONTENEDOR GENERAL === */
+.catalogo-container {
+  text-align: left;
+  margin: 20px 0 60px;
+  padding-left: 20px; /* 🔹 Más pegado al borde izquierdo */
+  padding-right: 460px; /* 🔹 Más espacio para el carrito */
+}
+
+.catalogo-container h2 {
+  font-size: 26px;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #222;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: aparecer 0.6s ease;
+}
+
+/* === GRID DE LIBROS === */
+.catalogo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  justify-items: start;
+  padding: 10px 10px;
+}
+
+/* === TARJETAS === */
+.libro-card {
+  background: white;
+  border-radius: 12px;
+  width: 180px;
+  padding: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+  cursor: pointer;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 💫 Efecto al pasar el mouse */
+.libro-card:hover {
+  transform: scale(1.05) translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+.libro-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.libro-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 10px 0 5px;
+  text-align: center;
+}
+
+.libro-card p {
+  color: #555;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+/* === BOTÓN AGREGAR === */
+.libro-card button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.libro-card button:hover {
+  background-color: #0056b3;
+}
+
+/* === BOTÓN “VER DETALLE DE PEDIDOS” === */
+.ver-pedidos-container {
+  text-align: center;
+  margin-top: 40px;
+  animation: aparecer 0.8s ease;
+}
+
+.btn-pedidos {
+  padding: 12px 30px;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-pedidos:hover {
+  background-color: #005ecb;
+  transform: translateY(-2px);
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .catalogo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
+  }
+  .catalogo-container {
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .catalogo-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .libro-card {
+    width: 250px;
+  }
+}
