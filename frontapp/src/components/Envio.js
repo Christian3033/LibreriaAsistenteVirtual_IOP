@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "./Envio.css";
 import L from "leaflet";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // 👈 para redirigir al comprobante
 
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/447/447031.png",
@@ -11,6 +12,9 @@ const customIcon = new L.Icon({
   iconAnchor: [17, 34],
 });
 
+// =========================
+// 📍 Componente del marcador
+// =========================
 function LocationMarker({ onSelect }) {
   const [position, setPosition] = useState(null);
 
@@ -24,11 +28,23 @@ function LocationMarker({ onSelect }) {
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
         );
         const data = await response.json();
-        const direccion = data.display_name || "Dirección no disponible";
-        onSelect({ lat, lng, direccion });
+        let direccion = data.display_name || "Dirección no disponible";
+
+        // 👉 Extraer la PRIMERA zona encontrada
+        const zonas = direccion.match(/Zona\s*\d+/gi);
+        const zonaDetectada = zonas && zonas.length > 0 ? zonas[0].replace(/\D/g, "") : "";
+
+        // 👉 Limpiar texto: eliminar otras zonas
+        if (zonas && zonas.length > 1) {
+          zonas.slice(1).forEach((z) => {
+            direccion = direccion.replace(z, "").trim();
+          });
+        }
+
+        onSelect({ lat, lng, direccion, zona: zonaDetectada });
       } catch (error) {
         console.error("Error al obtener dirección:", error);
-        onSelect({ lat, lng, direccion: "Error al obtener dirección" });
+        onSelect({ lat, lng, direccion: "Error al obtener dirección", zona: "" });
       }
     },
   });
@@ -40,13 +56,26 @@ function LocationMarker({ onSelect }) {
   ) : null;
 }
 
+// =========================
+// 🚚 Componente principal
+// =========================
 function Envio({ total, onVolver }) {
   const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [nit, setNit] = useState("");
+  const [dpi, setDpi] = useState("");
   const [zona, setZona] = useState("");
   const [direccion, setDireccion] = useState("");
   const [pos, setPos] = useState(null);
-  const [confirmacion, setConfirmacion] = useState(null); // 💬 para mostrar el cuadro de agradecimiento
+  const [mapKey, setMapKey] = useState(0);
+  const [confirmacion, setConfirmacion] = useState(null);
 
+  const navigate = useNavigate(); // 👈 hook para redirigir al comprobante
+
+  // =========================
+  // 🚛 Cálculo de envío y transporte
+  // =========================
   const calcularEnvio = (z) => {
     const num = parseInt(z);
     if (!num) return 0;
@@ -69,26 +98,86 @@ function Envio({ total, onVolver }) {
   const transporte = determinarTransporte(zona);
   const totalFinal = total + envio;
 
+  // ✅ Al seleccionar en el mapa
   const handleMapSelect = (data) => {
-    setPos(data);
+    setPos({ lat: data.lat, lng: data.lng });
     setDireccion(data.direccion);
+    if (data.zona) setZona(data.zona);
+    setMapKey((prev) => prev + 1); // 👈 Forzar redibujo del mapa
   };
 
+  // ✅ Al escribir dirección manualmente
+  const handleDireccionChange = async (e) => {
+    const nuevaDireccion = e.target.value;
+    setDireccion(nuevaDireccion);
+
+    if (nuevaDireccion.length > 8) {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            nuevaDireccion
+          )}`
+        );
+        const results = await response.json();
+        if (results.length > 0) {
+          const { lat, lon, display_name } = results[0];
+
+          // Buscar y limpiar zona
+          const zonas = display_name.match(/Zona\s*\d+/gi);
+          const zonaDetectada = zonas && zonas.length > 0 ? zonas[0].replace(/\D/g, "") : "";
+          let direccionLimpia = display_name;
+          if (zonas && zonas.length > 1) {
+            zonas.slice(1).forEach((z) => {
+              direccionLimpia = direccionLimpia.replace(z, "").trim();
+            });
+          }
+
+          setPos({ lat: parseFloat(lat), lng: parseFloat(lon) });
+          setDireccion(direccionLimpia);
+          if (zonaDetectada) setZona(zonaDetectada);
+          setMapKey((prev) => prev + 1); // 👈 actualizar mapa
+        }
+      } catch (err) {
+        console.error("Error al ubicar dirección escrita:", err);
+      }
+    }
+  };
+
+  // ✅ Envío al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!nombre || !apellido || !telefono || !nit || !dpi) {
+      alert("⚠️ Completa todos los campos del cliente antes de confirmar.");
+      return;
+    }
 
     try {
       const res = await axios.post("http://localhost:4000/api/pedidos", {
         nombre,
+        apellido,
+        telefono,
+        nit,
+        dpi,
         direccion,
         zona: `Zona ${zona}`,
-        total: totalFinal, // aquí enviamos ya el total con envío incluido
+        total: totalFinal,
       });
 
-      setConfirmacion(res.data); // ✅ guardar los datos del backend (mensaje, totalFinal, etc.)
+      setConfirmacion(res.data);
     } catch (error) {
       console.error("❌ Error al confirmar pedido:", error);
-      setConfirmacion({ error: true, mensaje: "No se pudo confirmar el pedido. Intenta nuevamente." });
+      setConfirmacion({
+        error: true,
+        mensaje: "No se pudo confirmar el pedido. Intenta nuevamente.",
+      });
+    }
+  };
+
+  // ✅ Ir al comprobante de pedido
+  const handleVerComprobante = () => {
+    if (confirmacion?.pedidoId) {
+      navigate(`/detalle/${confirmacion.pedidoId}`);
     }
   };
 
@@ -99,23 +188,63 @@ function Envio({ total, onVolver }) {
       {!confirmacion ? (
         <form className="envio-form" onSubmit={handleSubmit}>
           <label>
-            Nombre del cliente:
+            Nombre:
             <input
               type="text"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej. Ana Gómez"
+              placeholder="Ej. Ana"
+              required
+            />
+          </label>
+
+          <label>
+            Apellido:
+            <input
+              type="text"
+              value={apellido}
+              onChange={(e) => setApellido(e.target.value)}
+              placeholder="Ej. López"
+              required
+            />
+          </label>
+
+          <label>
+            Teléfono:
+            <input
+              type="text"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              placeholder="Ej. 5555-1234"
+              required
+            />
+          </label>
+
+          <label>
+            NIT:
+            <input
+              type="text"
+              value={nit}
+              onChange={(e) => setNit(e.target.value)}
+              placeholder="Ej. 1234567-8"
+              required
+            />
+          </label>
+
+          <label>
+            DPI:
+            <input
+              type="text"
+              value={dpi}
+              onChange={(e) => setDpi(e.target.value)}
+              placeholder="Ej. 1234567890101"
               required
             />
           </label>
 
           <label>
             Zona:
-            <select
-              value={zona}
-              onChange={(e) => setZona(e.target.value)}
-              required
-            >
+            <select value={zona} onChange={(e) => setZona(e.target.value)} required>
               <option value="">Seleccione zona</option>
               {Array.from({ length: 21 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
@@ -130,15 +259,16 @@ function Envio({ total, onVolver }) {
             <input
               type="text"
               value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              placeholder="Haz clic en el mapa para seleccionar"
+              onChange={handleDireccionChange}
+              placeholder="Haz clic en el mapa o escribe tu dirección"
               required
             />
           </label>
 
           <MapContainer
-            center={[14.6349, -90.5069]}
-            zoom={13}
+            key={mapKey}
+            center={pos ? [pos.lat, pos.lng] : [14.6349, -90.5069]}
+            zoom={14}
             style={{
               height: "420px",
               width: "100%",
@@ -152,10 +282,11 @@ function Envio({ total, onVolver }) {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <LocationMarker onSelect={handleMapSelect} />
+            {pos && <Marker position={pos} icon={customIcon}></Marker>}
           </MapContainer>
 
           <div className="resumen">
-            <p><strong>Zona:</strong> {zona ? `Zona ${zona}` : "No seleccionada"}</p>
+            <p><strong>Zona:</strong> {zona ? `Zona ${zona}` : "No detectada"}</p>
             <p className="transporte">
               <strong>Transporte:</strong> {transporte.tipo}{" "}
               <span className={transporte.clase}>{transporte.icon}</span>
@@ -178,13 +309,16 @@ function Envio({ total, onVolver }) {
           ) : (
             <>
               <h3>🎉 ¡Gracias por tu compra, {nombre}!</h3>
-              <p>Te comentamos que el pago se realiza <strong>contra entrega</strong>.</p>
-              <p>Mensajero asignado <strong>{confirmacion.mensajero}</strong> </p>
-              <p>El mensajero lleva cambio, si tu pago es en efectivo y POS, si tu pago es en tarjeta</p>
-              <p><strong>Total a cancelar:</strong> Q{confirmacion.totalFinal.toFixed(2)}</p>
-              <p><strong>Sucursal de despacho:</strong> {confirmacion.sucursal}</p>
+              <p>Tu número de pedido es <strong>#{confirmacion.pedidoId}</strong></p>
+              <p>Pago <strong>contra entrega</strong>.</p>
+              <p>Mensajero asignado: <strong>{confirmacion.mensajero}</strong></p>
+              <p><strong>Total:</strong> Q{confirmacion.totalFinal.toFixed(2)}</p>
+              <p><strong>Sucursal:</strong> {confirmacion.sucursal}</p>
 
-            
+              {/* 👇 Nuevo botón para ir al comprobante */}
+              <button className="btn-detalle" onClick={handleVerComprobante}>
+                🧾 Ver comprobante de pedido
+              </button>
             </>
           )}
         </div>

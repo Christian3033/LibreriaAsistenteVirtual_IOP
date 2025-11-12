@@ -1,3 +1,4 @@
+/* === CONTENEDOR PRINCIPAL DEL CHATBOT === */
 .chatbot-container {
   position: fixed;
   bottom: 20px;
@@ -17,8 +18,9 @@
   cursor: pointer;
 }
 
+/* === ENCABEZADO DEL CHATBOT === */
 .chatbot-header {
-  background-color: #0078ff;
+  background-color: #3F7856; /* amazon */
   color: white;
   padding: 12px;
   font-weight: bold;
@@ -29,11 +31,12 @@
   border-radius: 8px 8px 0 0;
 }
 
+/* === BOTÓN DE COLAPSAR === */
 .toggle-btn {
   font-size: 18px;
   font-weight: bold;
   background-color: white;
-  color: #0078ff;
+  color: #3F7856; /* amazon */
   border-radius: 50%;
   width: 22px;
   height: 22px;
@@ -41,13 +44,15 @@
   line-height: 22px;
 }
 
+/* === CUERPO DEL CHAT === */
 .chatbot-body {
-  background-color: #f9f9f9;
+  background-color: #A3D2D5; /* pale robin egg blue */
   max-height: 300px;
   overflow-y: auto;
   padding: 10px;
 }
 
+/* === MENSAJES === */
 .mensaje {
   margin: 8px 0;
   padding: 10px;
@@ -57,7 +62,7 @@
 }
 
 .mensaje.usuario {
-  background-color: #0078ff;
+  background-color: #6AA5A9; /* green sheen */
   color: white;
   align-self: flex-end;
   text-align: right;
@@ -65,11 +70,12 @@
 }
 
 .mensaje.bot {
-  background-color: #ececec;
-  color: #333;
+  background-color: #E7F2F2; /* tono claro derivado */
+  color: #45625D; /* deep space sparkle */
   text-align: left;
 }
 
+/* === ÁREA DE ENTRADA === */
 .chatbot-input {
   display: flex;
   border-top: 1px solid #ddd;
@@ -85,15 +91,16 @@
 }
 
 .chatbot-input button {
-  background-color: #0078ff;
+  background-color: #7EC384; /* iguana green */
   color: white;
   border: none;
   padding: 10px 15px;
   border-radius: 0 0 12px 0;
   cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.3s ease;
 }
 
 .chatbot-input button:hover {
-  background-color: #005fcc;
+  background-color: #3F7856; /* amazon */
 }
